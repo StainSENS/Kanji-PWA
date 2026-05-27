@@ -52,7 +52,7 @@ export function FlashcardReviewer({ deck }: { deck: Flashcard[] }) {
       <GlassPanel className="p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-sm/5 text-white/80 group-data-[theme=light]:text-slate-600">
+            <div className="text-sm/5 text-white/80">
               Review
             </div>
             <div className="text-base font-semibold tracking-tight">
@@ -68,7 +68,6 @@ export function FlashcardReviewer({ deck }: { deck: Flashcard[] }) {
               "shadow-lg active:scale-[0.99] border",
               "bg-white/20 border-white/30 hover:bg-white/30",
               "group-data-[theme=dark]:bg-white/12 group-data-[theme=dark]:border-white/20 group-data-[theme=dark]:hover:bg-white/18",
-              "group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8",
               canStudy ? "" : "opacity-50 cursor-not-allowed hover:bg-white/20",
             ].join(" ")}
           >
@@ -76,16 +75,14 @@ export function FlashcardReviewer({ deck }: { deck: Flashcard[] }) {
           </button>
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-3 text-sm text-white/80 group-data-[theme=light]:text-slate-600">
+        <div className="mt-3 flex items-center justify-between gap-3 text-sm text-white/80">
           <div>
             Deck:{" "}
-            <span className="font-semibold text-white group-data-[theme=light]:text-slate-900">
-              {deck.length}
-            </span>
+            <span className="font-semibold text-white">{deck.length}</span>
           </div>
           <div>
             Queue:{" "}
-            <span className="font-semibold text-white group-data-[theme=light]:text-slate-900">
+            <span className="font-semibold text-white">
               {queueCount > 0 ? queueCount : "—"}
             </span>
           </div>
@@ -110,8 +107,7 @@ export function FlashcardReviewer({ deck }: { deck: Flashcard[] }) {
                     onClick={() => rate(4)}
                     className="h-12 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
                     bg-white/20 border-white/30 hover:bg-white/28
-                    group-data-[theme=dark]:bg-white/12 group-data-[theme=dark]:border-white/20 group-data-[theme=dark]:hover:bg-white/18
-                    group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8"
+                    group-data-[theme=dark]:bg-white/12 group-data-[theme=dark]:border-white/20 group-data-[theme=dark]:hover:bg-white/18"
                   >
                     Hard
                   </button>
@@ -120,14 +116,13 @@ export function FlashcardReviewer({ deck }: { deck: Flashcard[] }) {
                     onClick={() => rate(7)}
                     className="h-12 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
                     bg-white/30 border-white/35 hover:bg-white/40
-                    group-data-[theme=dark]:bg-white/18 group-data-[theme=dark]:border-white/22 group-data-[theme=dark]:hover:bg-white/24
-                    group-data-[theme=light]:bg-slate-900/8 group-data-[theme=light]:border-slate-900/12 group-data-[theme=light]:hover:bg-slate-900/12"
+                    group-data-[theme=dark]:bg-white/18 group-data-[theme=dark]:border-white/22 group-data-[theme=dark]:hover:bg-white/24"
                   >
                     Easy
                   </button>
                 </div>
               ) : (
-                <div className="text-center text-sm text-white/75 group-data-[theme=light]:text-slate-600">
+                <div className="text-center text-sm text-white/75">
                   Flip the card to rate it.
                 </div>
               )}

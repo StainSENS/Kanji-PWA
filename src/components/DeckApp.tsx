@@ -10,14 +10,17 @@ import { FlashcardReviewer } from "@/components/FlashcardReviewer";
 import { GlassPanel } from "@/components/GlassPanel";
 
 type Mode = "Create" | "Review";
-type ThemeVariant = "soft" | "dark" | "light";
+type ThemeVariant = "soft" | "dark";
 
 const THEME_KEY = "kanjiDeckThemeV1";
 
 function loadTheme(): ThemeVariant {
   if (typeof window === "undefined") return "soft";
   const t = window.localStorage.getItem(THEME_KEY);
-  return t === "dark" || t === "light" || t === "soft" ? t : "soft";
+  if (t === "dark" || t === "soft") return t;
+  // Back-compat: remove "light" variant but keep users on soft.
+  if (t === "light") return "soft";
+  return "soft";
 }
 
 function saveTheme(theme: ThemeVariant) {
@@ -56,7 +59,7 @@ export function DeckApp() {
     return [...cards].sort((a, b) => b.createdAt - a.createdAt);
   }, [activeDeck]);
 
-  const textClass = theme === "light" ? "text-slate-900" : "text-white";
+  const textClass = "text-white";
 
   return (
     <div
@@ -80,9 +83,9 @@ export function DeckApp() {
           transition={{ duration: 0.35, ease: "easeOut" }}
         />
         <motion.div
-          className="absolute inset-0 bg-white bg-[radial-gradient(1200px_circle_at_20%_10%,rgba(56,189,248,0.20),transparent_60%),radial-gradient(900px_circle_at_80%_20%,rgba(45,212,191,0.16),transparent_55%),linear-gradient(180deg,rgba(255,255,255,1),rgba(255,255,255,0.90))]"
-          animate={{ opacity: theme === "light" ? 1 : 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="absolute inset-0 pointer-events-none"
+          animate={{ opacity: 0 }}
+          transition={{ duration: 0 }}
         />
       </div>
 
@@ -92,7 +95,7 @@ export function DeckApp() {
             <div
               className={[
                 "text-sm",
-                theme === "light" ? "text-slate-600" : "text-white/80",
+                "text-white/80",
               ].join(" ")}
             >
               Kanji Flashcards
@@ -104,7 +107,7 @@ export function DeckApp() {
           <div
             className={[
               "text-right text-sm",
-              theme === "light" ? "text-slate-600" : "text-white/80",
+              "text-white/80",
             ].join(" ")}
           >
             <div className="font-semibold">{sortedCards.length}</div>
@@ -147,7 +150,6 @@ export function DeckApp() {
                   }}
                   className="h-10 px-3 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
                   bg-white/10 border-white/15 hover:bg-white/18
-                  group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8
                   group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
                 >
                   New
@@ -171,7 +173,6 @@ export function DeckApp() {
                   }}
                   className="h-10 px-3 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
                   bg-white/10 border-white/15 hover:bg-white/18
-                  group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8
                   group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
                 >
                   Rename
@@ -195,7 +196,6 @@ export function DeckApp() {
                   disabled={decks.length <= 1}
                   className="h-10 px-3 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
                   bg-white/10 border-white/15 hover:bg-white/18 disabled:opacity-50 disabled:cursor-not-allowed
-                  group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8
                   group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
                 >
                   Delete
@@ -216,7 +216,6 @@ export function DeckApp() {
                         ? "bg-white/25 border-white/30"
                         : "bg-white/10 border-white/15 hover:bg-white/18",
                       "group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15",
-                      "group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:text-slate-900",
                     ].join(" ")}
                   >
                     {d.name}
@@ -230,15 +229,13 @@ export function DeckApp() {
         <div
           className={[
             "mt-4 grid grid-cols-2 gap-3",
-            theme === "light" ? "text-slate-900" : "text-white",
+            "text-white",
           ].join(" ")}
         >
           <div
             className={[
               "inline-flex w-full rounded-2xl p-1 border shadow-sm",
-              theme === "light"
-                ? "bg-slate-900/5 border-slate-900/10"
-                : "bg-white/15 border-white/20",
+              "bg-white/15 border-white/20",
             ].join(" ")}
           >
           {(["Review", "Create"] as const).map((m) => (
@@ -249,12 +246,8 @@ export function DeckApp() {
               className={[
                 "h-11 flex-1 rounded-xl font-semibold transition",
                 mode === m
-                  ? theme === "light"
-                    ? "bg-white shadow-sm"
-                    : "bg-white/30"
-                  : theme === "light"
-                    ? "hover:bg-white/60"
-                    : "hover:bg-white/15",
+                  ? "bg-white/30"
+                  : "hover:bg-white/15",
               ].join(" ")}
             >
               {m}
@@ -265,16 +258,13 @@ export function DeckApp() {
           <div
             className={[
               "inline-flex w-full rounded-2xl p-1 border shadow-sm",
-              theme === "light"
-                ? "bg-slate-900/5 border-slate-900/10"
-                : "bg-white/15 border-white/20",
+              "bg-white/15 border-white/20",
             ].join(" ")}
           >
             {(
               [
                 { id: "soft", label: "Soft" },
                 { id: "dark", label: "Dark" },
-                { id: "light", label: "Light" },
               ] as const
             ).map((t) => (
               <button
@@ -284,12 +274,8 @@ export function DeckApp() {
                 className={[
                   "h-11 flex-1 rounded-xl font-semibold transition text-sm",
                   theme === t.id
-                    ? theme === "light"
-                      ? "bg-white shadow-sm"
-                      : "bg-white/30"
-                    : theme === "light"
-                      ? "hover:bg-white/60"
-                      : "hover:bg-white/15",
+                    ? "bg-white/30"
+                    : "hover:bg-white/15",
                 ].join(" ")}
               >
                 {t.label}
@@ -398,7 +384,7 @@ export function DeckApp() {
         <div
           className={[
             "mt-6 pb-6 text-center text-xs",
-            theme === "light" ? "text-slate-500" : "text-white/65",
+            "text-white/65",
           ].join(" ")}
         >
           Tip: Add this to your home screen for a full-screen, app-like feel.

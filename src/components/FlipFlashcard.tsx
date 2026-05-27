@@ -39,13 +39,13 @@ export function FlipFlashcard({
           }}
         >
           <div className="flex items-start justify-between gap-3">
-            <div className="text-xs font-semibold tracking-wide text-white/80 group-data-[theme=light]:text-slate-600">
+            <div className="text-xs font-semibold tracking-wide text-white/80">
               FRONT
             </div>
           </div>
           <div className="mt-10 text-center">
             <div className="text-6xl font-semibold tracking-tight">{kanji}</div>
-            <div className="mt-4 text-sm text-white/75 group-data-[theme=light]:text-slate-600">
+            <div className="mt-4 text-sm text-white/75">
               Tap to flip
             </div>
           </div>
@@ -60,15 +60,15 @@ export function FlipFlashcard({
           }}
         >
           <div className="flex items-start justify-between gap-3">
-            <div className="text-xs font-semibold tracking-wide text-white/80 group-data-[theme=light]:text-slate-600">
+            <div className="text-xs font-semibold tracking-wide text-white/80">
               BACK
             </div>
-            <div className="text-xs text-white/70 group-data-[theme=light]:text-slate-500">
+            <div className="text-xs text-white/70">
               Tap to flip
             </div>
           </div>
           <div className="mt-10 text-center">
-            <div className="text-sm font-semibold text-white/70 group-data-[theme=light]:text-slate-600">
+            <div className="text-sm font-semibold text-white/70">
               Meaning
             </div>
             <div className="mt-2 text-2xl font-semibold tracking-tight">

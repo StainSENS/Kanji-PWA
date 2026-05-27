@@ -14,8 +14,6 @@ export function GlassPanel({
           "bg-white/20 border border-white/30",
           // Dark
           "group-data-[theme=dark]:bg-white/12 group-data-[theme=dark]:border-white/20",
-          // Light
-          "group-data-[theme=light]:bg-white/65 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:shadow-lg",
         ].join(" "),
         className,
       )}

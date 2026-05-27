@@ -29,7 +29,7 @@ export function CardCreator({ onAdd }: { onAdd: (card: Flashcard) => void }) {
     <GlassPanel className="p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="text-sm/5 text-white/80 group-data-[theme=light]:text-slate-600">
+          <div className="text-sm/5 text-white/80">
             Create card
           </div>
           <div className="text-base font-semibold tracking-tight">Add to deck</div>
@@ -38,7 +38,7 @@ export function CardCreator({ onAdd }: { onAdd: (card: Flashcard) => void }) {
 
       <div className="mt-4 grid gap-3">
         <label className="grid gap-1.5">
-          <div className="text-sm text-white/85 group-data-[theme=light]:text-slate-700">
+          <div className="text-sm text-white/85">
             Kanji
           </div>
           <textarea
@@ -49,13 +49,12 @@ export function CardCreator({ onAdd }: { onAdd: (card: Flashcard) => void }) {
             placeholder="例: 食べる / 猫"
             className="w-full resize-none rounded-xl px-3 py-2 text-lg leading-7 outline-none transition
             bg-white/15 border border-white/25 placeholder:text-white/45 focus:border-white/45 focus:bg-white/20
-            group-data-[theme=dark]:bg-white/12 group-data-[theme=dark]:border-white/20 group-data-[theme=dark]:placeholder:text-white/40 group-data-[theme=dark]:focus:bg-white/16
-            group-data-[theme=light]:bg-white/70 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:text-slate-900 group-data-[theme=light]:placeholder:text-slate-500 group-data-[theme=light]:focus:bg-white"
+            group-data-[theme=dark]:bg-white/12 group-data-[theme=dark]:border-white/20 group-data-[theme=dark]:placeholder:text-white/40 group-data-[theme=dark]:focus:bg-white/16"
           />
         </label>
 
         <label className="grid gap-1.5">
-          <div className="text-sm text-white/85 group-data-[theme=light]:text-slate-700">
+          <div className="text-sm text-white/85">
             English meaning
           </div>
           <input
@@ -65,8 +64,7 @@ export function CardCreator({ onAdd }: { onAdd: (card: Flashcard) => void }) {
             placeholder="e.g. to eat / cat"
             className="w-full rounded-xl px-3 py-2 text-base outline-none transition
             bg-white/15 border border-white/25 placeholder:text-white/45 focus:border-white/45 focus:bg-white/20
-            group-data-[theme=dark]:bg-white/12 group-data-[theme=dark]:border-white/20 group-data-[theme=dark]:placeholder:text-white/40 group-data-[theme=dark]:focus:bg-white/16
-            group-data-[theme=light]:bg-white/70 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:text-slate-900 group-data-[theme=light]:placeholder:text-slate-500 group-data-[theme=light]:focus:bg-white"
+            group-data-[theme=dark]:bg-white/12 group-data-[theme=dark]:border-white/20 group-data-[theme=dark]:placeholder:text-white/40 group-data-[theme=dark]:focus:bg-white/16"
           />
         </label>
 
@@ -79,7 +77,6 @@ export function CardCreator({ onAdd }: { onAdd: (card: Flashcard) => void }) {
             "border shadow-lg active:scale-[0.99]",
             "bg-white/25 border-white/30 hover:bg-white/35",
             "group-data-[theme=dark]:bg-white/14 group-data-[theme=dark]:border-white/20 group-data-[theme=dark]:hover:bg-white/18",
-            "group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8",
             canSubmit ? "" : "opacity-50 cursor-not-allowed hover:bg-white/25",
           ].join(" ")}
         >
