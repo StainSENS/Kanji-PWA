@@ -71,7 +71,7 @@ export function DeckApp() {
       data-theme={theme}
     >
       {/* Animated theme backdrops (visible change) */}
-      <div className="absolute inset-0 -z-10">
+      <div className="fixed inset-0 -z-10">
         <motion.div
           className="absolute inset-0 bg-[#2aa9a8] bg-[radial-gradient(1200px_circle_at_20%_10%,rgba(34,211,238,0.35),transparent_55%),radial-gradient(900px_circle_at_80%_20%,rgba(45,212,191,0.30),transparent_50%),linear-gradient(160deg,rgba(20,184,166,0.28),rgba(56,189,248,0.22))]"
           animate={{ opacity: theme === "soft" ? 1 : 0 }}
@@ -119,7 +119,7 @@ export function DeckApp() {
           <GlassPanel className="p-3">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <div className="text-xs text-white/80 group-data-[theme=light]:text-slate-600">
+                <div className="text-xs text-white/80">
                   Deck
                 </div>
                 <div className="truncate font-semibold">
@@ -305,20 +305,20 @@ export function DeckApp() {
               />
               {sortedCards.length > 0 ? (
                 <GlassPanel className="p-4">
-                  <div className="text-sm text-white/80 group-data-[theme=light]:text-slate-600 group-data-[theme=dark]:text-white/80">
+                  <div className="text-sm text-white/80 group-data-[theme=dark]:text-white/80">
                     Deck preview
                   </div>
                   <div className="mt-3 max-h-[38dvh] overflow-y-auto pr-1 grid gap-2">
                     {sortedCards.map((c) => (
                       <div
                         key={c.id}
-                        className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 bg-white/10 border border-white/15 group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15"
+                        className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 bg-white/10 border border-white/15 group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15"
                       >
                         <div className="min-w-0">
                           <div className="truncate font-semibold">
                             {c.kanji}
                           </div>
-                          <div className="truncate text-sm text-white/75 group-data-[theme=light]:text-slate-600 group-data-[theme=dark]:text-white/75">
+                          <div className="truncate text-sm text-white/75 group-data-[theme=dark]:text-white/75">
                             {c.meaning}
                           </div>
                         </div>
@@ -340,7 +340,6 @@ export function DeckApp() {
                           aria-label="Remove card"
                           className="shrink-0 h-9 w-9 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
                           bg-white/10 border-white/15 hover:bg-white/18
-                          group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8
                           group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
                         >
                           ×
@@ -367,7 +366,6 @@ export function DeckApp() {
                       }}
                       className="w-full h-11 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
                       bg-white/10 border-white/15 hover:bg-white/18
-                      group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8
                       group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
                     >
                       Clear this deck
