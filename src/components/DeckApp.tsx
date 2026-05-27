@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import type { Flashcard } from "@/lib/deckTypes";
-import { loadDeck, saveDeck } from "@/lib/deckStorage";
+import type { DeckFolder } from "@/lib/appState";
+import { loadAppState, saveAppState } from "@/lib/appState";
 import { CardCreator } from "@/components/CardCreator";
 import { FlashcardReviewer } from "@/components/FlashcardReviewer";
 import { GlassPanel } from "@/components/GlassPanel";
@@ -25,26 +26,35 @@ function saveTheme(theme: ThemeVariant) {
 }
 
 export function DeckApp() {
-  const [deck, setDeck] = useState<Flashcard[]>([]);
+  const [decks, setDecks] = useState<DeckFolder[]>([]);
+  const [activeDeckId, setActiveDeckId] = useState("");
   const [mode, setMode] = useState<Mode>("Review");
   const [theme, setTheme] = useState<ThemeVariant>("soft");
 
   useEffect(() => {
-    setDeck(loadDeck());
+    const state = loadAppState();
+    setDecks(state.decks);
+    setActiveDeckId(state.activeDeckId);
     setTheme(loadTheme());
   }, []);
 
   useEffect(() => {
-    saveDeck(deck);
-  }, [deck]);
+    if (!activeDeckId) return;
+    saveAppState({ version: 1, activeDeckId, decks });
+  }, [decks, activeDeckId]);
 
   useEffect(() => {
     saveTheme(theme);
   }, [theme]);
 
-  const sortedDeck = useMemo(() => {
-    return [...deck].sort((a, b) => b.createdAt - a.createdAt);
-  }, [deck]);
+  const activeDeck = useMemo(() => {
+    return decks.find((d) => d.id === activeDeckId) ?? decks[0];
+  }, [decks, activeDeckId]);
+
+  const sortedCards = useMemo(() => {
+    const cards = activeDeck?.cards ?? [];
+    return [...cards].sort((a, b) => b.createdAt - a.createdAt);
+  }, [activeDeck]);
 
   const textClass = theme === "light" ? "text-slate-900" : "text-white";
 
@@ -97,9 +107,124 @@ export function DeckApp() {
               theme === "light" ? "text-slate-600" : "text-white/80",
             ].join(" ")}
           >
-            <div className="font-semibold">{deck.length}</div>
+            <div className="font-semibold">{sortedCards.length}</div>
             <div>cards</div>
           </div>
+        </div>
+
+        <div className="mt-3">
+          <GlassPanel className="p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-xs text-white/80 group-data-[theme=light]:text-slate-600">
+                  Deck
+                </div>
+                <div className="truncate font-semibold">
+                  {activeDeck?.name ?? "—"}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const name =
+                      typeof window !== "undefined"
+                        ? window.prompt("New deck name?", "New Deck")
+                        : null;
+                    if (!name) return;
+                    const now = Date.now();
+                    const id = `${now}-${Math.random().toString(16).slice(2)}`;
+                    const next: DeckFolder = {
+                      id,
+                      name: name.trim() || "New Deck",
+                      cards: [],
+                      createdAt: now,
+                      updatedAt: now,
+                    };
+                    setDecks((d) => [next, ...d]);
+                    setActiveDeckId(id);
+                    setMode("Create");
+                  }}
+                  className="h-10 px-3 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
+                  bg-white/10 border-white/15 hover:bg-white/18
+                  group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8
+                  group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
+                >
+                  New
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!activeDeck) return;
+                    const name =
+                      typeof window !== "undefined"
+                        ? window.prompt("Rename deck to…", activeDeck.name)
+                        : null;
+                    if (!name) return;
+                    setDecks((ds) =>
+                      ds.map((d) =>
+                        d.id === activeDeck.id
+                          ? { ...d, name: name.trim() || d.name, updatedAt: Date.now() }
+                          : d,
+                      ),
+                    );
+                  }}
+                  className="h-10 px-3 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
+                  bg-white/10 border-white/15 hover:bg-white/18
+                  group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8
+                  group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
+                >
+                  Rename
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!activeDeck) return;
+                    if (decks.length <= 1) return;
+                    if (
+                      typeof window !== "undefined" &&
+                      window.confirm(`Delete deck "${activeDeck.name}"?`)
+                    ) {
+                      setDecks((ds) => ds.filter((d) => d.id !== activeDeck.id));
+                      setActiveDeckId((id) => {
+                        const remaining = decks.filter((d) => d.id !== activeDeck.id);
+                        return remaining[0]?.id ?? id;
+                      });
+                    }
+                  }}
+                  disabled={decks.length <= 1}
+                  className="h-10 px-3 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
+                  bg-white/10 border-white/15 hover:bg-white/18 disabled:opacity-50 disabled:cursor-not-allowed
+                  group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8
+                  group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            {decks.length > 1 ? (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
+                {decks.map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => setActiveDeckId(d.id)}
+                    className={[
+                      "shrink-0 h-9 px-3 rounded-xl font-semibold border transition",
+                      d.id === activeDeckId
+                        ? "bg-white/25 border-white/30"
+                        : "bg-white/10 border-white/15 hover:bg-white/18",
+                      "group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15",
+                      "group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:text-slate-900",
+                    ].join(" ")}
+                  >
+                    {d.name}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </GlassPanel>
         </div>
 
         <div
@@ -177,15 +302,28 @@ export function DeckApp() {
           {mode === "Create" ? (
             <div className="grid gap-4">
               <CardCreator
-                onAdd={(card) => setDeck((d) => [card, ...d])}
+                onAdd={(card) => {
+                  if (!activeDeck) return;
+                  setDecks((ds) =>
+                    ds.map((d) =>
+                      d.id === activeDeck.id
+                        ? {
+                            ...d,
+                            cards: [card, ...d.cards],
+                            updatedAt: Date.now(),
+                          }
+                        : d,
+                    ),
+                  );
+                }}
               />
-              {sortedDeck.length > 0 ? (
+              {sortedCards.length > 0 ? (
                 <GlassPanel className="p-4">
                   <div className="text-sm text-white/80 group-data-[theme=light]:text-slate-600 group-data-[theme=dark]:text-white/80">
                     Deck preview
                   </div>
-                  <div className="mt-3 grid gap-2">
-                    {sortedDeck.slice(0, 6).map((c) => (
+                  <div className="mt-3 max-h-[38dvh] overflow-y-auto pr-1 grid gap-2">
+                    {sortedCards.map((c) => (
                       <div
                         key={c.id}
                         className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 bg-white/10 border border-white/15 group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15"
@@ -201,7 +339,17 @@ export function DeckApp() {
                         <button
                           type="button"
                           onClick={() =>
-                            setDeck((d) => d.filter((x) => x.id !== c.id))
+                            setDecks((ds) =>
+                              ds.map((d) =>
+                                d.id === activeDeckId
+                                  ? {
+                                      ...d,
+                                      cards: d.cards.filter((x) => x.id !== c.id),
+                                      updatedAt: Date.now(),
+                                    }
+                                  : d,
+                              ),
+                            )
                           }
                           aria-label="Remove card"
                           className="shrink-0 h-9 w-9 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
@@ -214,16 +362,6 @@ export function DeckApp() {
                       </div>
                     ))}
                   </div>
-                  {sortedDeck.length > 6 ? (
-                    <div
-                      className={[
-                        "mt-3 text-xs",
-                        theme === "light" ? "text-slate-500" : "text-white/70",
-                      ].join(" ")}
-                    >
-                      Showing latest 6 cards.
-                    </div>
-                  ) : null}
                   <div className="mt-3">
                     <button
                       type="button"
@@ -232,7 +370,13 @@ export function DeckApp() {
                           typeof window !== "undefined" &&
                           window.confirm("Remove all cards from this device?")
                         ) {
-                          setDeck([]);
+                          setDecks((ds) =>
+                            ds.map((d) =>
+                              d.id === activeDeckId
+                                ? { ...d, cards: [], updatedAt: Date.now() }
+                                : d,
+                            ),
+                          );
                         }
                       }}
                       className="w-full h-11 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
@@ -240,14 +384,14 @@ export function DeckApp() {
                       group-data-[theme=light]:bg-slate-900/5 group-data-[theme=light]:border-slate-900/10 group-data-[theme=light]:hover:bg-slate-900/8
                       group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
                     >
-                      Clear deck
+                      Clear this deck
                     </button>
                   </div>
                 </GlassPanel>
               ) : null}
             </div>
           ) : (
-            <FlashcardReviewer deck={sortedDeck} />
+            <FlashcardReviewer deck={sortedCards} />
           )}
         </div>
 
