@@ -1,4 +1,4 @@
-import type { CardType, Flashcard } from "@/lib/deckTypes";
+import type { Flashcard } from "@/lib/deckTypes";
 
 const STORAGE_KEY = "kanjiDeckV1";
 
@@ -12,11 +12,9 @@ export function loadDeck(): Flashcard[] {
     return parsed
       .filter((c) => c && typeof c === "object")
       .map((c: any) => {
-        const type: CardType = c.type === "Verb" ? "Verb" : "Noun";
         return {
           id: String(c.id ?? ""),
           kanji: String(c.kanji ?? ""),
-          type,
           meaning: String(c.meaning ?? ""),
           createdAt: Number(c.createdAt ?? Date.now()),
         } satisfies Flashcard;

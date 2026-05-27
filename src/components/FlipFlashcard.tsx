@@ -1,18 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { CardType } from "@/lib/deckTypes";
 import { GlassPanel } from "@/components/GlassPanel";
 
 export function FlipFlashcard({
   kanji,
-  type,
   meaning,
   flipped,
   onToggle,
 }: {
   kanji: string;
-  type: CardType;
   meaning: string;
   flipped: boolean;
   onToggle: () => void;
@@ -42,16 +39,13 @@ export function FlipFlashcard({
           }}
         >
           <div className="flex items-start justify-between gap-3">
-            <div className="text-xs font-semibold tracking-wide text-white/80">
+            <div className="text-xs font-semibold tracking-wide text-white/80 group-data-[theme=light]:text-slate-600">
               FRONT
-            </div>
-            <div className="rounded-full bg-white/15 border border-white/20 px-3 py-1 text-xs font-semibold">
-              {type}
             </div>
           </div>
           <div className="mt-10 text-center">
             <div className="text-6xl font-semibold tracking-tight">{kanji}</div>
-            <div className="mt-4 text-sm text-white/75">
+            <div className="mt-4 text-sm text-white/75 group-data-[theme=light]:text-slate-600">
               Tap to flip
             </div>
           </div>
@@ -66,13 +60,17 @@ export function FlipFlashcard({
           }}
         >
           <div className="flex items-start justify-between gap-3">
-            <div className="text-xs font-semibold tracking-wide text-white/80">
+            <div className="text-xs font-semibold tracking-wide text-white/80 group-data-[theme=light]:text-slate-600">
               BACK
             </div>
-            <div className="text-xs text-white/70">Tap to flip</div>
+            <div className="text-xs text-white/70 group-data-[theme=light]:text-slate-500">
+              Tap to flip
+            </div>
           </div>
           <div className="mt-10 text-center">
-            <div className="text-sm font-semibold text-white/70">Meaning</div>
+            <div className="text-sm font-semibold text-white/70 group-data-[theme=light]:text-slate-600">
+              Meaning
+            </div>
             <div className="mt-2 text-2xl font-semibold tracking-tight">
               {meaning}
             </div>
