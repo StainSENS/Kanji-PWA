@@ -1,0 +1,85 @@
+"use client";
+
+import { motion } from "framer-motion";
+import type { CardType } from "@/lib/deckTypes";
+import { GlassPanel } from "@/components/GlassPanel";
+
+export function FlipFlashcard({
+  kanji,
+  type,
+  meaning,
+  flipped,
+  onToggle,
+}: {
+  kanji: string;
+  type: CardType;
+  meaning: string;
+  flipped: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="w-full" style={{ perspective: 1400 }}>
+      <motion.button
+        type="button"
+        onClick={onToggle}
+        className="relative w-full text-left"
+        style={{
+          transformStyle: "preserve-3d",
+        }}
+        animate={{ rotateY: flipped ? 180 : 0 }}
+        transition={{
+          type: "spring",
+          stiffness: 520,
+          damping: 44,
+          mass: 0.9,
+        }}
+      >
+        <GlassPanel
+          className="relative w-full min-h-[240px] p-6 select-none"
+          style={{
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+          }}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="text-xs font-semibold tracking-wide text-white/80">
+              FRONT
+            </div>
+            <div className="rounded-full bg-white/15 border border-white/20 px-3 py-1 text-xs font-semibold">
+              {type}
+            </div>
+          </div>
+          <div className="mt-10 text-center">
+            <div className="text-6xl font-semibold tracking-tight">{kanji}</div>
+            <div className="mt-4 text-sm text-white/75">
+              Tap to flip
+            </div>
+          </div>
+        </GlassPanel>
+
+        <GlassPanel
+          className="absolute inset-0 w-full min-h-[240px] p-6"
+          style={{
+            transform: "rotateY(180deg)",
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+          }}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="text-xs font-semibold tracking-wide text-white/80">
+              BACK
+            </div>
+            <div className="text-xs text-white/70">Tap to flip</div>
+          </div>
+          <div className="mt-10 text-center">
+            <div className="text-sm font-semibold text-white/70">Meaning</div>
+            <div className="mt-2 text-2xl font-semibold tracking-tight">
+              {meaning}
+            </div>
+          </div>
+        </GlassPanel>
+      </motion.button>
+    </div>
+  );
+}
+
