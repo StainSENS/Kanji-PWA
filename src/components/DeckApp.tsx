@@ -5,12 +5,14 @@ import { motion } from "framer-motion";
 import type { Flashcard } from "@/lib/deckTypes";
 import type { DeckFolder } from "@/lib/appState";
 import { loadAppState, saveAppState } from "@/lib/appState";
-import { CardCreator } from "@/components/CardCreator";
 import { FlashcardReviewer } from "@/components/FlashcardReviewer";
 import { GlassPanel } from "@/components/GlassPanel";
+import { DeckLibrary } from "@/components/DeckLibrary";
+import { DeckDetail } from "@/components/DeckDetail";
+import { SettingsSheet, type ThemeVariant } from "@/components/SettingsSheet";
+import { GearIcon } from "@/components/icons";
 
-type Mode = "Create" | "Review";
-type ThemeVariant = "soft" | "dark";
+type Screen = "library" | "deck" | "review";
 
 const THEME_KEY = "kanjiDeckThemeV1";
 
@@ -31,8 +33,9 @@ function saveTheme(theme: ThemeVariant) {
 export function DeckApp() {
   const [decks, setDecks] = useState<DeckFolder[]>([]);
   const [activeDeckId, setActiveDeckId] = useState("");
-  const [mode, setMode] = useState<Mode>("Review");
+  const [screen, setScreen] = useState<Screen>("library");
   const [theme, setTheme] = useState<ThemeVariant>("soft");
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     const state = loadAppState();
@@ -60,6 +63,59 @@ export function DeckApp() {
   }, [activeDeck]);
 
   const textClass = "text-white";
+
+  function newDeck() {
+    const name =
+      typeof window !== "undefined"
+        ? window.prompt("New deck name?", "New Deck")
+        : null;
+    if (!name) return;
+    const now = Date.now();
+    const id = `${now}-${Math.random().toString(16).slice(2)}`;
+    const next: DeckFolder = {
+      id,
+      name: name.trim() || "New Deck",
+      cards: [],
+      createdAt: now,
+      updatedAt: now,
+    };
+    setDecks((d) => [next, ...d]);
+    setActiveDeckId(id);
+    setScreen("deck");
+  }
+
+  function renameDeck(id: string) {
+    const deck = decks.find((d) => d.id === id);
+    if (!deck) return;
+    const name =
+      typeof window !== "undefined"
+        ? window.prompt("Rename deck to…", deck.name)
+        : null;
+    if (!name) return;
+    setDecks((ds) =>
+      ds.map((d) =>
+        d.id === id ? { ...d, name: name.trim() || d.name, updatedAt: Date.now() } : d,
+      ),
+    );
+  }
+
+  function deleteDeck(id: string) {
+    const deck = decks.find((d) => d.id === id);
+    if (!deck) return;
+    if (decks.length <= 1) return;
+    if (
+      typeof window !== "undefined" &&
+      window.confirm(`Delete deck "${deck.name}"?`)
+    ) {
+      setDecks((ds) => ds.filter((d) => d.id !== id));
+      setActiveDeckId((cur) => {
+        if (cur !== id) return cur;
+        const remaining = decks.filter((d) => d.id !== id);
+        return remaining[0]?.id ?? "";
+      });
+      setScreen("library");
+    }
+  }
 
   return (
     <div
@@ -90,7 +146,7 @@ export function DeckApp() {
       </div>
 
       <div className="w-full max-w-md">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
             <div
               className={[
@@ -104,192 +160,37 @@ export function DeckApp() {
               Kanji Deck
             </div>
           </div>
-          <div
-            className={[
-              "text-right text-sm",
-              "text-white/80",
-            ].join(" ")}
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Settings"
+            className="h-11 w-11 rounded-2xl border shadow-sm transition active:scale-[0.99]
+            bg-white/10 border-white/15 hover:bg-white/18"
           >
-            <div className="font-semibold">{sortedCards.length}</div>
-            <div>cards</div>
-          </div>
-        </div>
-
-        <div className="mt-3">
-          <GlassPanel className="p-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <div className="text-xs text-white/80">
-                  Deck
-                </div>
-                <div className="truncate font-semibold">
-                  {activeDeck?.name ?? "—"}
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const name =
-                      typeof window !== "undefined"
-                        ? window.prompt("New deck name?", "New Deck")
-                        : null;
-                    if (!name) return;
-                    const now = Date.now();
-                    const id = `${now}-${Math.random().toString(16).slice(2)}`;
-                    const next: DeckFolder = {
-                      id,
-                      name: name.trim() || "New Deck",
-                      cards: [],
-                      createdAt: now,
-                      updatedAt: now,
-                    };
-                    setDecks((d) => [next, ...d]);
-                    setActiveDeckId(id);
-                    setMode("Create");
-                  }}
-                  className="h-10 px-3 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
-                  bg-white/10 border-white/15 hover:bg-white/18
-                  group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
-                >
-                  New
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!activeDeck) return;
-                    const name =
-                      typeof window !== "undefined"
-                        ? window.prompt("Rename deck to…", activeDeck.name)
-                        : null;
-                    if (!name) return;
-                    setDecks((ds) =>
-                      ds.map((d) =>
-                        d.id === activeDeck.id
-                          ? { ...d, name: name.trim() || d.name, updatedAt: Date.now() }
-                          : d,
-                      ),
-                    );
-                  }}
-                  className="h-10 px-3 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
-                  bg-white/10 border-white/15 hover:bg-white/18
-                  group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
-                >
-                  Rename
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!activeDeck) return;
-                    if (decks.length <= 1) return;
-                    if (
-                      typeof window !== "undefined" &&
-                      window.confirm(`Delete deck "${activeDeck.name}"?`)
-                    ) {
-                      setDecks((ds) => ds.filter((d) => d.id !== activeDeck.id));
-                      setActiveDeckId((id) => {
-                        const remaining = decks.filter((d) => d.id !== activeDeck.id);
-                        return remaining[0]?.id ?? id;
-                      });
-                    }
-                  }}
-                  disabled={decks.length <= 1}
-                  className="h-10 px-3 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
-                  bg-white/10 border-white/15 hover:bg-white/18 disabled:opacity-50 disabled:cursor-not-allowed
-                  group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-
-            {decks.length > 1 ? (
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
-                {decks.map((d) => (
-                  <button
-                    key={d.id}
-                    type="button"
-                    onClick={() => setActiveDeckId(d.id)}
-                    className={[
-                      "shrink-0 h-9 px-3 rounded-xl font-semibold border transition",
-                      d.id === activeDeckId
-                        ? "bg-white/25 border-white/30"
-                        : "bg-white/10 border-white/15 hover:bg-white/18",
-                      "group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15",
-                    ].join(" ")}
-                  >
-                    {d.name}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </GlassPanel>
-        </div>
-
-        <div
-          className={[
-            "mt-4 grid grid-cols-2 gap-3",
-            "text-white",
-          ].join(" ")}
-        >
-          <div
-            className={[
-              "inline-flex w-full rounded-2xl p-1 border shadow-sm",
-              "bg-white/15 border-white/20",
-            ].join(" ")}
-          >
-          {(["Review", "Create"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMode(m)}
-              className={[
-                "h-11 flex-1 rounded-xl font-semibold transition",
-                mode === m
-                  ? "bg-white/30"
-                  : "hover:bg-white/15",
-              ].join(" ")}
-            >
-              {m}
-            </button>
-          ))}
-          </div>
-
-          <div
-            className={[
-              "inline-flex w-full rounded-2xl p-1 border shadow-sm",
-              "bg-white/15 border-white/20",
-            ].join(" ")}
-          >
-            {(
-              [
-                { id: "soft", label: "Soft" },
-                { id: "dark", label: "Dark" },
-              ] as const
-            ).map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTheme(t.id)}
-                className={[
-                  "h-11 flex-1 rounded-xl font-semibold transition text-sm",
-                  theme === t.id
-                    ? "bg-white/30"
-                    : "hover:bg-white/15",
-                ].join(" ")}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+            <GearIcon className="mx-auto h-5 w-5" />
+          </button>
         </div>
 
         <div className="mt-4">
-          {mode === "Create" ? (
-            <div className="grid gap-4">
-              <CardCreator
-                onAdd={(card) => {
-                  if (!activeDeck) return;
+          {screen === "library" ? (
+            <DeckLibrary
+              decks={decks}
+              activeDeckId={activeDeckId}
+              onOpenDeck={(id) => {
+                setActiveDeckId(id);
+                setScreen("deck");
+              }}
+              onNewDeck={newDeck}
+              onRenameDeck={renameDeck}
+              onDeleteDeck={deleteDeck}
+            />
+          ) : screen === "deck" ? (
+            activeDeck ? (
+              <DeckDetail
+                deck={activeDeck}
+                onBack={() => setScreen("library")}
+                onStartReview={() => setScreen("review")}
+                onAddCard={(card: Flashcard) => {
                   setDecks((ds) =>
                     ds.map((d) =>
                       d.id === activeDeck.id
@@ -302,80 +203,62 @@ export function DeckApp() {
                     ),
                   );
                 }}
-              />
-              {sortedCards.length > 0 ? (
-                <GlassPanel className="p-4">
-                  <div className="text-sm text-white/80 group-data-[theme=dark]:text-white/80">
-                    Deck preview
-                  </div>
-                  <div className="mt-3 max-h-[38dvh] overflow-y-auto pr-1 grid gap-2">
-                    {sortedCards.map((c) => (
-                      <div
-                        key={c.id}
-                        className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 bg-white/10 border border-white/15 group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15"
-                      >
-                        <div className="min-w-0">
-                          <div className="truncate font-semibold">
-                            {c.kanji}
-                          </div>
-                          <div className="truncate text-sm text-white/75 group-data-[theme=dark]:text-white/75">
-                            {c.meaning}
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setDecks((ds) =>
-                              ds.map((d) =>
-                                d.id === activeDeckId
-                                  ? {
-                                      ...d,
-                                      cards: d.cards.filter((x) => x.id !== c.id),
-                                      updatedAt: Date.now(),
-                                    }
-                                  : d,
-                              ),
-                            )
+                onRemoveCard={(cardId) => {
+                  setDecks((ds) =>
+                    ds.map((d) =>
+                      d.id === activeDeck.id
+                        ? {
+                            ...d,
+                            cards: d.cards.filter((x) => x.id !== cardId),
+                            updatedAt: Date.now(),
                           }
-                          aria-label="Remove card"
-                          className="shrink-0 h-9 w-9 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
-                          bg-white/10 border-white/15 hover:bg-white/18
-                          group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (
-                          typeof window !== "undefined" &&
-                          window.confirm("Remove all cards from this device?")
-                        ) {
-                          setDecks((ds) =>
-                            ds.map((d) =>
-                              d.id === activeDeckId
-                                ? { ...d, cards: [], updatedAt: Date.now() }
-                                : d,
-                            ),
-                          );
-                        }
-                      }}
-                      className="w-full h-11 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
-                      bg-white/10 border-white/15 hover:bg-white/18
-                      group-data-[theme=dark]:bg-white/10 group-data-[theme=dark]:border-white/15 group-data-[theme=dark]:hover:bg-white/18"
-                    >
-                      Clear this deck
-                    </button>
-                  </div>
-                </GlassPanel>
-              ) : null}
-            </div>
+                        : d,
+                    ),
+                  );
+                }}
+                onClearDeck={() => {
+                  setDecks((ds) =>
+                    ds.map((d) =>
+                      d.id === activeDeck.id
+                        ? { ...d, cards: [], updatedAt: Date.now() }
+                        : d,
+                    ),
+                  );
+                }}
+              />
+            ) : (
+              <GlassPanel className="p-6 text-center">
+                <div className="text-lg font-semibold">No deck selected</div>
+                <div className="mt-1 text-sm text-white/80">
+                  Create a new deck to begin.
+                </div>
+              </GlassPanel>
+            )
           ) : (
-            <FlashcardReviewer deck={sortedCards} />
+            <div className="grid gap-4">
+              <GlassPanel className="p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setScreen("deck")}
+                    className="h-10 px-3 rounded-xl font-semibold border shadow-sm transition active:scale-[0.99]
+                    bg-white/10 border-white/15 hover:bg-white/18"
+                  >
+                    Back
+                  </button>
+                  <div className="min-w-0 text-center">
+                    <div className="truncate font-semibold">
+                      {activeDeck?.name ?? "Review"}
+                    </div>
+                    <div className="text-xs text-white/75">
+                      {sortedCards.length} cards
+                    </div>
+                  </div>
+                  <div className="w-[74px]" />
+                </div>
+              </GlassPanel>
+              <FlashcardReviewer deck={sortedCards} />
+            </div>
           )}
         </div>
 
@@ -388,6 +271,13 @@ export function DeckApp() {
           Tip: Add this to your home screen for a full-screen, app-like feel.
         </div>
       </div>
+
+      <SettingsSheet
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        theme={theme}
+        onThemeChange={setTheme}
+      />
     </div>
   );
 }
